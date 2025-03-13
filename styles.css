@@ -573,6 +573,11 @@ textarea#htmlOutput {
     font-size: 1.2rem;
 }
 
+/* Standardize management ID width */
+#rulesTable td:first-child {
+    width: 100px;
+}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
