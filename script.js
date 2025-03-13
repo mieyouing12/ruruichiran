@@ -167,7 +167,7 @@ const loadingOverlay = document.getElementById('loadingOverlay');
 
 // State
 let rules = {};
-let missions = initialMissions;
+let missions = [];
 let navItems = [];
 let isLoggedIn = false;
 let currentEditId = null;
@@ -175,14 +175,6 @@ let currentEditNavId = null;
 let activeTabId = "server-rules"; // Default active tab
 let currentEditGradeIndex = null;
 let currentEditCrimeData = null;
-
-// Local storage keys
-const STORAGE_KEY = 'paradoxCity';
-const RULES_KEY = `${STORAGE_KEY}_rules`;
-const MISSIONS_KEY = `${STORAGE_KEY}_missions`;
-const NAV_ITEMS_KEY = `${STORAGE_KEY}_navItems`;
-const ACTIVE_TAB_KEY = `${STORAGE_KEY}_activeTabId`;
-const LOGIN_KEY = `${STORAGE_KEY}_isLoggedIn`;
 
 // Show and hide loading overlay functions
 function showLoading() {
@@ -193,40 +185,18 @@ function hideLoading() {
     loadingOverlay.style.display = 'none';
 }
 
-// Load data from local storage
-async function loadDataFromLocalStorage() {
+// Load data from initial constants
+async function loadDataFromInitialConstants() {
     showLoading();
     
     try {
-        // Load rules
-        const storedRules = localStorage.getItem(RULES_KEY);
-        if (storedRules) {
-            rules = JSON.parse(storedRules);
-        } else {
-            rules = initialRules;
-        }
+        // Always load from initial constants
+        rules = JSON.parse(JSON.stringify(initialRules)); // Deep copy
+        missions = JSON.parse(JSON.stringify(initialMissions)); // Deep copy
+        navItems = JSON.parse(JSON.stringify(initialNavItems)); // Deep copy
         
-        // Load missions
-        const storedMissions = localStorage.getItem(MISSIONS_KEY);
-        if (storedMissions) {
-            missions = JSON.parse(storedMissions);
-        } else {
-            missions = initialMissions;
-        }
-        
-        // Load navigation items
-        const storedNavItems = localStorage.getItem(NAV_ITEMS_KEY);
-        if (storedNavItems) {
-            navItems = JSON.parse(storedNavItems);
-        } else {
-            navItems = initialNavItems;
-        }
-        
-        // Load active tab
-        const storedActiveTabId = localStorage.getItem(ACTIVE_TAB_KEY);
-        if (storedActiveTabId && navItems.some(item => item.id === storedActiveTabId)) {
-            activeTabId = storedActiveTabId;
-        } else if (navItems.length > 0) {
+        // Set default active tab
+        if (navItems.length > 0) {
             activeTabId = navItems[0].id;
         }
         
@@ -245,55 +215,20 @@ async function loadDataFromLocalStorage() {
             }
         });
         
-        // Load login state
-        const storedLoginState = localStorage.getItem(LOGIN_KEY);
-        if (storedLoginState === 'true') {
-            handleLogin(true); // Silent login
-        }
+        // Reset login state
+        isLoggedIn = false;
     } catch (error) {
-        console.error("Error loading data from local storage:", error);
-        // Fallback to initial data
-        rules = initialRules;
-        missions = initialMissions;
-        navItems = initialNavItems;
-        
-        // Ensure each nav item has a prefix
-        navItems = navItems.map(item => {
-            if (!item.prefix) {
-                item.prefix = generateRandomPrefix();
-            }
-            return item;
-        });
-        
-        // Ensure all tabs have a rules array
-        navItems.forEach(item => {
-            if (!rules[item.id]) {
-                rules[item.id] = [];
-            }
-        });
-        
-        alert("データの読み込み中にエラーが発生しました。初期データを使用します。");
+        console.error("Error loading initial data:", error);
+        alert("初期データの読み込み中にエラーが発生しました。");
     } finally {
         hideLoading();
     }
 }
 
-// Save data to local storage
+// This function is kept for API compatibility but does nothing now
 async function saveDataToLocalStorage() {
-    showLoading();
-    
-    try {
-        localStorage.setItem(RULES_KEY, JSON.stringify(rules));
-        localStorage.setItem(MISSIONS_KEY, JSON.stringify(missions));
-        localStorage.setItem(NAV_ITEMS_KEY, JSON.stringify(navItems));
-        localStorage.setItem(ACTIVE_TAB_KEY, activeTabId);
-        localStorage.setItem(LOGIN_KEY, isLoggedIn);
-    } catch (error) {
-        console.error("Error saving data to local storage:", error);
-        alert("データの保存中にエラーが発生しました。");
-    } finally {
-        hideLoading();
-    }
+    // Function intentionally left empty - no longer saving to localStorage
+    return;
 }
 
 // Get the active tab's rules
@@ -347,8 +282,8 @@ function generateNextRuleId() {
 
 // Initialize the application
 async function init() {
-    // Load data from local storage
-    await loadDataFromLocalStorage();
+    // Load data from initial constants instead of localStorage
+    await loadDataFromInitialConstants();
     
     // Render the navigation items
     renderNavItems();
@@ -386,9 +321,6 @@ function renderNavItems() {
             document.querySelectorAll('.nav-item').forEach(tab => tab.classList.remove('active'));
             this.classList.add('active');
             activeTabId = item.id;
-            
-            // Save active tab to local storage
-            saveDataToLocalStorage();
             
             // Toggle mission table vs rules table
             if (activeTabId === 'mission-list') {
@@ -577,9 +509,6 @@ function saveEditedRule() {
     // Update the rules object
     rules[activeTabId] = updatedRules;
     
-    // Save to local storage
-    saveDataToLocalStorage();
-    
     // Reset and close modal
     editModal.style.display = 'none';
     currentEditId = null;
@@ -599,9 +528,6 @@ function handleDeleteRule(id) {
         
         // Update the rules object
         rules[activeTabId] = updatedRules;
-        
-        // Save to local storage
-        saveDataToLocalStorage();
         
         // Re-render the table
         renderRulesTable();
@@ -632,9 +558,6 @@ function addNewRule() {
     
     // Update the rules object
     rules[activeTabId] = updatedRules;
-    
-    // Save to local storage
-    saveDataToLocalStorage();
     
     // Clear the form
     newRuleId.value = generateNextRuleId();
@@ -682,9 +605,6 @@ function addNewNavItem() {
     if (!rules[id]) {
         rules[id] = [];
     }
-    
-    // Save to local storage
-    saveDataToLocalStorage();
     
     // Close modal and clear form
     navModal.style.display = 'none';
@@ -744,9 +664,6 @@ function saveEditedNavItem() {
         return item;
     });
     
-    // Save to local storage
-    saveDataToLocalStorage();
-    
     // Reset and close modal
     editNavModal.style.display = 'none';
     currentEditNavId = null;
@@ -781,9 +698,6 @@ function handleDeleteNavItem(id) {
         if (id === activeTabId && navItems.length > 0) {
             activeTabId = navItems[0].id;
         }
-        
-        // Save to local storage
-        saveDataToLocalStorage();
         
         // Re-render navigation and rules
         renderNavItems();
@@ -923,10 +837,6 @@ function setupMissionEditListeners() {
             const gradeIndex = parseInt(this.getAttribute('data-index'));
             if (confirm(`このグレード「${missions[gradeIndex].grade}」とそのすべての犯罪を削除してもよろしいですか？`)) {
                 missions.splice(gradeIndex, 1);
-                
-                // Save to local storage
-                saveDataToLocalStorage();
-                
                 renderMissionTable();
             }
         });
@@ -966,9 +876,6 @@ function setupMissionEditListeners() {
                     }
                 }
                 
-                // Save to local storage
-                saveDataToLocalStorage();
-                
                 renderMissionTable();
             }
         });
@@ -993,9 +900,6 @@ function setupMissionEditFormListeners() {
             fine: gradeFine,
             crimes: []
         });
-        
-        // Save to local storage
-        saveDataToLocalStorage();
         
         // Clear form
         newGradeName.value = '';
@@ -1031,9 +935,6 @@ function setupMissionEditFormListeners() {
         // Add to selected grade
         missions[gradeIndex].crimes.push(newCrime);
         
-        // Save to local storage
-        saveDataToLocalStorage();
-        
         // Clear form
         newCrimeName.value = '';
         newPoliceCount.value = '';
@@ -1063,9 +964,6 @@ function setupMissionEditFormListeners() {
         // Update grade
         missions[currentEditGradeIndex].grade = gradeName;
         missions[currentEditGradeIndex].fine = gradeFine;
-        
-        // Save to local storage
-        saveDataToLocalStorage();
         
         // Close modal
         editGradeModal.style.display = 'none';
@@ -1125,9 +1023,6 @@ function setupMissionEditFormListeners() {
             missions[gradeIndex].crimes[crimeIndex] = updatedCrime;
         }
         
-        // Save to local storage
-        saveDataToLocalStorage();
-        
         // Close modal
         editCrimeModal.style.display = 'none';
         currentEditCrimeData = null;
@@ -1158,7 +1053,7 @@ function handleLogin(silent = false) {
         
         // Simple authentication (dummy)
         if (username !== 'aim' || password !== '123123123') {
-            alert('ログイン情報が正しくありません');
+            alert('ログイン情報が正しくありません。');
             return;
         }
         
@@ -1170,9 +1065,6 @@ function handleLogin(silent = false) {
     }
     
     isLoggedIn = true;
-    
-    // Save login state to local storage
-    saveDataToLocalStorage();
     
     // Update UI for admin mode
     actionsHeader.style.display = 'table-cell';
@@ -1211,9 +1103,6 @@ function handleLogin(silent = false) {
 function handleLogout() {
     isLoggedIn = false;
     
-    // Save logout state to local storage
-    saveDataToLocalStorage();
-    
     // Update UI for normal mode
     actionsHeader.style.display = 'none';
     adminActions.style.display = 'none';
@@ -1234,6 +1123,17 @@ function handleLogout() {
     if (activeTabId === 'mission-list') {
         renderMissionTable();
     }
+    
+    // Reset the application to initial state
+    loadDataFromInitialConstants().then(() => {
+        renderNavItems();
+        
+        if (activeTabId === 'mission-list') {
+            renderMissionTable();
+        } else {
+            renderRulesTable();
+        }
+    });
 }
 
 // Setup all event listeners
@@ -1461,5 +1361,40 @@ function copyHtmlToClipboard() {
     alert('HTMLがクリップボードにコピーされました！');
 }
 
+// Reset button - added for convenience in the demo
+function addResetButton() {
+    const resetButton = document.createElement('button');
+    resetButton.className = 'btn btn-blue';
+    resetButton.innerHTML = '<i class="fas fa-redo"></i> 情報を更新';
+    resetButton.style.position = 'fixed';
+    resetButton.style.bottom = '20px';
+    resetButton.style.right = '20px';
+    resetButton.style.zIndex = '999';
+    
+    resetButton.addEventListener('click', function() {
+        if (confirm('最新情報に更新しますか？')) {
+            loadDataFromInitialConstants().then(() => {
+                renderNavItems();
+                
+                if (activeTabId === 'mission-list') {
+                    renderMissionTable();
+                } else {
+                    renderRulesTable();
+                }
+                
+                // Reset login state
+                if (isLoggedIn) {
+                    handleLogout();
+                }
+            });
+        }
+    });
+    
+    document.body.appendChild(resetButton);
+}
+
 // Initialize the app when the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', function() {
+    init();
+    addResetButton(); // Add a reset button for demo purposes
+});
