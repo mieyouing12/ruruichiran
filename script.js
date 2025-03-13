@@ -1,18 +1,18 @@
-// Firebase Configuration - 既存の設定をそのまま使用
+// Firebase Configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyDCxMq0KwaFRhF2XqGON_0NcZ0OSBMdBfA",
-    authDomain: "paradox-city-rules.firebaseapp.com",
-    databaseURL: "https://paradox-city-rules-default-rtdb.firebaseio.com",
-    projectId: "paradox-city-rules",
-    storageBucket: "paradox-city-rules.appspot.com",
-    messagingSenderId: "458284435175",
-    appId: "1:458284435175:web:0a7b2e036a5e9f41f7d8ca"
+  apiKey: "AIzaSyClS0w9XwuoHZWiJA5f7cHTS7UAyTGxBUo",
+  authDomain: "paradox-3ceb3.firebaseapp.com",
+  databaseURL: "https://paradox-3ceb3-default-rtdb.firebaseio.com", // Add this line
+  projectId: "paradox-3ceb3",
+  storageBucket: "paradox-3ceb3.appspot.com",
+  messagingSenderId: "817556135266",
+  appId: "1:817556135266:web:d5d0f3b1c2c6e8a662e03b"
 };
 
-// 変数の定義は維持し、初期化を関数に移動
-let database;
-let rootRef;
-const loadingOverlay = document.getElementById('loadingOverlay');
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const rootRef = database.ref('paradoxCity');
 
 // Firebase初期化機能を分離
 function initializeFirebase() {
