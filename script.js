@@ -1,42 +1,26 @@
-// Firebase Configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyClS0w9XwuoHZWiJA5f7cHTS7UAyTGxBUo",
-  authDomain: "paradox-3ceb3.firebaseapp.com",
-  databaseURL: "https://paradox-3ceb3-default-rtdb.firebaseio.com", // Add this line
-  projectId: "paradox-3ceb3",
-  storageBucket: "paradox-3ceb3.appspot.com",
-  messagingSenderId: "817556135266",
-  appId: "1:817556135266:web:d5d0f3b1c2c6e8a662e03b"
+// Initial rules data - organized by navigation ID
+const initialRules = {
+    "server-rules": [
+        { id: "SR-001", description: "サーバーに参加する全てのプレイヤーはこのルールに従う必要があります。" },
+        { id: "SR-002", description: "他のプレイヤーへの嫌がらせや迷惑行為は禁止です。" },
+        { id: "SR-003", description: "チートやハックの使用は即時BANの対象となります。" },
+        { id: "SR-004", description: "<span class='text-red'>配信者ルール</span>：配信中は視聴者に対して敬意を持って接してください。" }
+    ],
+    "police-rules": [
+        { id: "PR-001", description: "警察官は法律を遵守し、常に公平に行動する必要があります。" },
+        { id: "PR-002", description: "パトロール中は定期的に無線チェックインを行ってください。" }
+    ],
+    "criminal-rules": [
+        { id: "CR-001", description: "犯罪行為を行う前に、適切なロールプレイをしてください。" },
+        { id: "CR-002", description: "他のプレイヤーを長時間拘束することは禁止されています。" }
+    ],
+    "related-rules": [
+        { id: "RR-001", description: "関係者は全ての取引を記録する必要があります。" }
+    ],
+    "mission-list": [
+        { id: "ML-001", description: "ミッション参加者は指定された時間に集合してください。" }
+    ]
 };
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-const rootRef = database.ref('paradoxCity');
-
-// Firebase初期化機能を分離
-function initializeFirebase() {
-    try {
-        // Firebase SDKの初期化
-        firebase.initializeApp(firebaseConfig);
-        database = firebase.database();
-        
-        // オフラインでも動作するようにデータの永続化を設定
-        database.setPersistence(firebase.database.Persistence.LOCAL)
-            .catch(error => {
-                console.error("オフライン永続化設定エラー:", error);
-                // 永続化の設定に失敗しても処理は継続
-            });
-        
-        rootRef = database.ref('paradoxCity');
-        return true;
-    } catch (error) {
-        console.error("Firebase初期化エラー:", error);
-        alert("Firebaseの初期化に失敗しました。初期データを使用します。");
-        hideLoading();
-        return false;
-    }
-}
 
 // Initial missions data
 const initialMissions = [
@@ -52,11 +36,8 @@ const initialMissions = [
         grade: "強盗罪",
         fine: "罰金1,000,000円",
         crimes: [
-            { name: "マネーロンダリング", police: 0 },
             { name: "ブースティングB以下", police: 1 },
-            { name: "ATM強盗", police: 2, note: "(テスト期間中)" },
-            { name: "コンビニ強盗", police: 3, note: "(テスト期間中)" },
-            { name: "高級車強奪ミッション", police: 4 }
+            { name: "コンビニ強盗", police: 3, note: "(テスト期間中)" }
         ]
     },
     { 
@@ -67,7 +48,7 @@ const initialMissions = [
             { name: "航空機ハッキング強盗 (人質利用禁止)", police: 4 },
             { name: "宝石店強盗", police: 4 },
             { name: "サーマルミッション (人質利用禁止)", police: 4, note: "(テスト期間中)" },
-            { name: "パレト銀行強盗(テスト期間中)", police: 4 }
+            { name: "パレト銀行強盗", police: 4 }
         ]
     },
     { 
@@ -83,9 +64,7 @@ const initialMissions = [
             { name: "工場襲撃 (プレリリース)", police: 8 },
             { name: "アーティファクト", police: 9 },
             { name: "ユニオンヘイスト", police: 10 },
-            { name: "パシフィック銀行強盗", police: 11 },
-            { name: "ダイヤモンドカジノ強盗", police: 11 },
-            { name: "パレト銀行強盗", police: 4 }
+            { name: "パシフィック銀行強盗", police: 11 }
         ]
     }
 ];
@@ -164,6 +143,7 @@ const editPoliceCount = document.getElementById('editPoliceCount');
 const editCrimeNote = document.getElementById('editCrimeNote');
 const cancelEditCrimeBtn = document.getElementById('cancelEditCrimeBtn');
 const saveEditCrimeBtn = document.getElementById('saveEditCrimeBtn');
+const loadingOverlay = document.getElementById('loadingOverlay');
 
 // State
 let rules = {};
@@ -176,83 +156,56 @@ let activeTabId = "server-rules"; // Default active tab
 let currentEditGradeIndex = null;
 let currentEditCrimeData = null;
 
-// Track local updates
-let lastLocalUpdate = Date.now();
+// Local storage keys
+const STORAGE_KEY = 'paradoxCity';
+const RULES_KEY = `${STORAGE_KEY}_rules`;
+const MISSIONS_KEY = `${STORAGE_KEY}_missions`;
+const NAV_ITEMS_KEY = `${STORAGE_KEY}_navItems`;
+const ACTIVE_TAB_KEY = `${STORAGE_KEY}_activeTabId`;
+const LOGIN_KEY = `${STORAGE_KEY}_isLoggedIn`;
 
-// Functions for Firebase data management
-// ローディング関連の関数を改善
+// Show and hide loading overlay functions
 function showLoading() {
-    if (loadingOverlay) {
-        loadingOverlay.style.display = 'flex';
-    }
+    loadingOverlay.style.display = 'flex';
 }
 
 function hideLoading() {
-    if (loadingOverlay) {
-        loadingOverlay.style.display = 'none';
-    }
+    loadingOverlay.style.display = 'none';
 }
 
-// 初期化処理を呼び出す部分を修正
-document.addEventListener('DOMContentLoaded', () => {
-    try {
-        init();
-        
-        // Firebase接続状態のモニタリングを開始
-        monitorFirebaseConnection();
-    } catch (error) {
-        console.error("スタートアップエラー:", error);
-        hideLoading();
-        alert("アプリケーションの起動中にエラーが発生しました。ページを再読み込みしてください。");
-    }
-});
-
-// Firebase接続状態のモニタリングを追加
-function monitorFirebaseConnection() {
-    if (!firebase || !firebase.database) return;
-    
-    const connectedRef = firebase.database().ref(".info/connected");
-    connectedRef.on("value", (snap) => {
-        if (snap.val() === true) {
-            console.log("Firebase接続: オンライン");
-        } else {
-            console.log("Firebase接続: オフライン");
-            // オフライン時の処理をここに追加可能
-        }
-    });
-}
-
-// Firebase からデータを読み込む関数
-async function loadDataFromFirebase() {
+// Load data from local storage
+async function loadDataFromLocalStorage() {
     showLoading();
     
-    // タイムアウト処理を追加（10秒後）
-    const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("データ読み込みがタイムアウトしました")), 10000);
-    });
-    
     try {
-        // タイムアウトとデータ取得を競争させる
-        const snapshot = await Promise.race([
-            rootRef.once('value'),
-            timeoutPromise
-        ]);
+        // Load rules
+        const storedRules = localStorage.getItem(RULES_KEY);
+        if (storedRules) {
+            rules = JSON.parse(storedRules);
+        } else {
+            rules = initialRules;
+        }
         
-        const data = snapshot.val() || {};
+        // Load missions
+        const storedMissions = localStorage.getItem(MISSIONS_KEY);
+        if (storedMissions) {
+            missions = JSON.parse(storedMissions);
+        } else {
+            missions = initialMissions;
+        }
         
-        // 既存の処理を維持
-        // Load rules or use initial data
-        rules = data.rules || initialRules;
+        // Load navigation items
+        const storedNavItems = localStorage.getItem(NAV_ITEMS_KEY);
+        if (storedNavItems) {
+            navItems = JSON.parse(storedNavItems);
+        } else {
+            navItems = initialNavItems;
+        }
         
-        // Load missions or use initial data
-        missions = data.missions || initialMissions;
-        
-        // Load navigation items or use initial data
-        navItems = data.navItems || initialNavItems;
-        
-        // Get active tab from data or default to first tab
-        if (data.activeTabId && navItems.some(item => item.id === data.activeTabId)) {
-            activeTabId = data.activeTabId;
+        // Load active tab
+        const storedActiveTabId = localStorage.getItem(ACTIVE_TAB_KEY);
+        if (storedActiveTabId && navItems.some(item => item.id === storedActiveTabId)) {
+            activeTabId = storedActiveTabId;
         } else if (navItems.length > 0) {
             activeTabId = navItems[0].id;
         }
@@ -273,13 +226,13 @@ async function loadDataFromFirebase() {
         });
         
         // Load login state
-        if (data.isLoggedIn === true) {
+        const storedLoginState = localStorage.getItem(LOGIN_KEY);
+        if (storedLoginState === 'true') {
             handleLogin(true); // Silent login
         }
     } catch (error) {
-        console.error("Firebaseからのデータ読み込みエラー:", error);
-        
-        // 既存のフォールバック処理を維持
+        console.error("Error loading data from local storage:", error);
+        // Fallback to initial data
         rules = initialRules;
         missions = initialMissions;
         navItems = initialNavItems;
@@ -301,103 +254,26 @@ async function loadDataFromFirebase() {
         
         alert("データの読み込み中にエラーが発生しました。初期データを使用します。");
     } finally {
-        // ローディング画面を必ず非表示にする
         hideLoading();
     }
 }
 
-// Firebaseにデータを保存する関数
-async function saveDataToFirebase() {
+// Save data to local storage
+async function saveDataToLocalStorage() {
     showLoading();
     
-    // タイムアウト処理を追加（8秒後）
-    const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("データ保存がタイムアウトしました")), 8000);
-    });
-    
     try {
-        // タイムアウトとデータ保存を競争させる
-        await Promise.race([
-            rootRef.set({
-                rules: rules,
-                missions: missions,
-                navItems: navItems,
-                activeTabId: activeTabId,
-                isLoggedIn: isLoggedIn,
-                lastUpdated: firebase.database.ServerValue.TIMESTAMP
-            }),
-            timeoutPromise
-        ]);
+        localStorage.setItem(RULES_KEY, JSON.stringify(rules));
+        localStorage.setItem(MISSIONS_KEY, JSON.stringify(missions));
+        localStorage.setItem(NAV_ITEMS_KEY, JSON.stringify(navItems));
+        localStorage.setItem(ACTIVE_TAB_KEY, activeTabId);
+        localStorage.setItem(LOGIN_KEY, isLoggedIn);
     } catch (error) {
-        console.error("Firebaseへのデータ保存エラー:", error);
-        alert("データの保存中にエラーが発生しました。後でもう一度お試しください。");
+        console.error("Error saving data to local storage:", error);
+        alert("データの保存中にエラーが発生しました。");
     } finally {
-        // ローディング画面を必ず非表示にする
         hideLoading();
     }
-}
-
-// リアルタイム更新のリスナーをセットアップする関数
-function setupRealtimeListeners() {
-    // 既存のリスナーを一旦解除（重複防止）
-    rootRef.off('value');
-    
-    // エラーハンドリングを追加したリスナー設定
-    rootRef.on('value', 
-        (snapshot) => {
-            try {
-                const data = snapshot.val() || {};
-                
-                // 既存の処理を維持
-                // Only update if the data is newer than our current data
-                if (data.lastUpdated && data.lastUpdated > lastLocalUpdate) {
-                    // Update local data
-                    rules = data.rules || initialRules;
-                    missions = data.missions || initialMissions;
-                    navItems = data.navItems || initialNavItems;
-                    
-                    // Check if we need to switch active tab
-                    if (data.activeTabId && activeTabId !== data.activeTabId) {
-                        activeTabId = data.activeTabId;
-                    }
-                    
-                    // Ensure each nav item has a prefix
-                    navItems = navItems.map(item => {
-                        if (!item.prefix) {
-                            item.prefix = generateRandomPrefix();
-                        }
-                        return item;
-                    });
-                    
-                    // Ensure all tabs have a rules array
-                    navItems.forEach(item => {
-                        if (!rules[item.id]) {
-                            rules[item.id] = [];
-                        }
-                    });
-                    
-                    // Update UI
-                    renderNavItems();
-                    if (activeTabId === 'mission-list') {
-                        renderMissionTable();
-                    } else {
-                        renderRulesTable();
-                    }
-                    
-                    lastLocalUpdate = data.lastUpdated;
-                }
-            } catch (error) {
-                console.error("リアルタイムデータ処理エラー:", error);
-                // エラーがあっても処理は継続、UIは更新しない
-            }
-        }, 
-        (error) => {
-            // リスナー設定エラー時の処理
-            console.error("Firebaseリスナーエラー:", error);
-            alert("データの監視中にエラーが発生しました。一部の機能が制限される可能性があります。");
-            // エラーがあっても処理は継続
-        }
-    );
 }
 
 // Get the active tab's rules
@@ -449,80 +325,28 @@ function generateNextRuleId() {
     return `${prefix}-${String(nextNumber).padStart(3, "0")}`;
 }
 
-// アプリケーションを初期化する関数
+// Initialize the application
 async function init() {
-    showLoading();
+    // Load data from local storage
+    await loadDataFromLocalStorage();
     
-    try {
-        // Firebase初期化
-        if (!initializeFirebase()) {
-            // Firebase初期化に失敗した場合、初期データで続行
-            console.log("初期データを使用して起動します");
-            rules = initialRules;
-            missions = initialMissions;
-            navItems = initialNavItems;
-            
-            // Ensure each nav item has a prefix
-            navItems = navItems.map(item => {
-                if (!item.prefix) {
-                    item.prefix = generateRandomPrefix();
-                }
-                return item;
-            });
-            
-            // Ensure all tabs have a rules array
-            navItems.forEach(item => {
-                if (!rules[item.id]) {
-                    rules[item.id] = [];
-                }
-            });
-            
-            // 初期化を続行
-            renderNavItems();
-            if (activeTabId === 'mission-list') {
-                rulesTableContainer.style.display = 'none';
-                missionTableContainer.style.display = 'block';
-                renderMissionTable();
-            } else {
-                rulesTableContainer.style.display = 'block';
-                missionTableContainer.style.display = 'none';
-                renderRulesTable();
-            }
-            
-            setupEventListeners();
-            setupMissionEditFormListeners();
-            return;
-        }
-        
-        // Firebaseからデータを読み込む
-        await loadDataFromFirebase();
-        
-        // リアルタイムリスナーをセットアップ
-        setupRealtimeListeners();
-        
-        // ナビゲーション項目を描画
-        renderNavItems();
-        
-        // アクティブタブによってテーブル表示を切り替え
-        if (activeTabId === 'mission-list') {
-            rulesTableContainer.style.display = 'none';
-            missionTableContainer.style.display = 'block';
-            renderMissionTable();
-        } else {
-            rulesTableContainer.style.display = 'block';
-            missionTableContainer.style.display = 'none';
-            renderRulesTable();
-        }
-        
-        // イベントリスナーをセットアップ
-        setupEventListeners();
-        setupMissionEditFormListeners();
-        
-    } catch (error) {
-        console.error("アプリケーション初期化エラー:", error);
-        alert("アプリケーションの初期化中にエラーが発生しました。ページを再読み込みしてください。");
-        hideLoading();
+    // Render the navigation items
+    renderNavItems();
+    
+    // Check if we should show missions or rules
+    if (activeTabId === 'mission-list') {
+        rulesTableContainer.style.display = 'none';
+        missionTableContainer.style.display = 'block';
+        renderMissionTable();
+    } else {
+        rulesTableContainer.style.display = 'block';
+        missionTableContainer.style.display = 'none';
+        renderRulesTable();
     }
+    
+    // Set up event listeners
+    setupEventListeners();
+    setupMissionEditFormListeners();
 }
 
 // Render the navigation items
@@ -543,9 +367,8 @@ function renderNavItems() {
             this.classList.add('active');
             activeTabId = item.id;
             
-            // Save active tab to Firebase
-            lastLocalUpdate = Date.now();
-            saveDataToFirebase();
+            // Save active tab to local storage
+            saveDataToLocalStorage();
             
             // Toggle mission table vs rules table
             if (activeTabId === 'mission-list') {
@@ -553,7 +376,7 @@ function renderNavItems() {
                 missionTableContainer.style.display = 'block';
                 renderMissionTable();
                 if (isLoggedIn) {
-                    adminActions.style.display = 'none';
+                    adminActions.style.display = 'block'; // Show the admin actions for missions too
                     addRuleContainer.style.display = 'none';
                     missionAdminControls.style.display = 'block';
                     missionActionsHeader.style.display = 'table-cell';
@@ -734,9 +557,8 @@ function saveEditedRule() {
     // Update the rules object
     rules[activeTabId] = updatedRules;
     
-    // Save to Firebase
-    lastLocalUpdate = Date.now();
-    saveDataToFirebase();
+    // Save to local storage
+    saveDataToLocalStorage();
     
     // Reset and close modal
     editModal.style.display = 'none';
@@ -758,9 +580,8 @@ function handleDeleteRule(id) {
         // Update the rules object
         rules[activeTabId] = updatedRules;
         
-        // Save to Firebase
-        lastLocalUpdate = Date.now();
-        saveDataToFirebase();
+        // Save to local storage
+        saveDataToLocalStorage();
         
         // Re-render the table
         renderRulesTable();
@@ -792,9 +613,8 @@ function addNewRule() {
     // Update the rules object
     rules[activeTabId] = updatedRules;
     
-    // Save to Firebase
-    lastLocalUpdate = Date.now();
-    saveDataToFirebase();
+    // Save to local storage
+    saveDataToLocalStorage();
     
     // Clear the form
     newRuleId.value = generateNextRuleId();
@@ -843,9 +663,8 @@ function addNewNavItem() {
         rules[id] = [];
     }
     
-    // Save to Firebase
-    lastLocalUpdate = Date.now();
-    saveDataToFirebase();
+    // Save to local storage
+    saveDataToLocalStorage();
     
     // Close modal and clear form
     navModal.style.display = 'none';
@@ -905,9 +724,8 @@ function saveEditedNavItem() {
         return item;
     });
     
-    // Save to Firebase
-    lastLocalUpdate = Date.now();
-    saveDataToFirebase();
+    // Save to local storage
+    saveDataToLocalStorage();
     
     // Reset and close modal
     editNavModal.style.display = 'none';
@@ -944,9 +762,8 @@ function handleDeleteNavItem(id) {
             activeTabId = navItems[0].id;
         }
         
-        // Save to Firebase
-        lastLocalUpdate = Date.now();
-        saveDataToFirebase();
+        // Save to local storage
+        saveDataToLocalStorage();
         
         // Re-render navigation and rules
         renderNavItems();
@@ -1087,9 +904,8 @@ function setupMissionEditListeners() {
             if (confirm(`このグレード「${missions[gradeIndex].grade}」とそのすべての犯罪を削除してもよろしいですか？`)) {
                 missions.splice(gradeIndex, 1);
                 
-                // Save to Firebase
-                lastLocalUpdate = Date.now();
-                saveDataToFirebase();
+                // Save to local storage
+                saveDataToLocalStorage();
                 
                 renderMissionTable();
             }
@@ -1130,9 +946,8 @@ function setupMissionEditListeners() {
                     }
                 }
                 
-                // Save to Firebase
-                lastLocalUpdate = Date.now();
-                saveDataToFirebase();
+                // Save to local storage
+                saveDataToLocalStorage();
                 
                 renderMissionTable();
             }
@@ -1159,9 +974,8 @@ function setupMissionEditFormListeners() {
             crimes: []
         });
         
-        // Save to Firebase
-        lastLocalUpdate = Date.now();
-        saveDataToFirebase();
+        // Save to local storage
+        saveDataToLocalStorage();
         
         // Clear form
         newGradeName.value = '';
@@ -1197,9 +1011,8 @@ function setupMissionEditFormListeners() {
         // Add to selected grade
         missions[gradeIndex].crimes.push(newCrime);
         
-        // Save to Firebase
-        lastLocalUpdate = Date.now();
-        saveDataToFirebase();
+        // Save to local storage
+        saveDataToLocalStorage();
         
         // Clear form
         newCrimeName.value = '';
@@ -1231,9 +1044,8 @@ function setupMissionEditFormListeners() {
         missions[currentEditGradeIndex].grade = gradeName;
         missions[currentEditGradeIndex].fine = gradeFine;
         
-        // Save to Firebase
-        lastLocalUpdate = Date.now();
-        saveDataToFirebase();
+        // Save to local storage
+        saveDataToLocalStorage();
         
         // Close modal
         editGradeModal.style.display = 'none';
@@ -1293,9 +1105,8 @@ function setupMissionEditFormListeners() {
             missions[gradeIndex].crimes[crimeIndex] = updatedCrime;
         }
         
-        // Save to Firebase
-        lastLocalUpdate = Date.now();
-        saveDataToFirebase();
+        // Save to local storage
+        saveDataToLocalStorage();
         
         // Close modal
         editCrimeModal.style.display = 'none';
@@ -1326,8 +1137,8 @@ function handleLogin(silent = false) {
         const password = document.getElementById('password').value;
         
         // Simple authentication (dummy)
-        if (username !== 'admin' || password !== 'admin123') {
-            alert('ログイン情報が正しくありません。試用アカウント: admin/admin123');
+        if (username !== 'aim' || password !== '123123123') {
+            alert('ログイン情報が正しくありません。');
             return;
         }
         
@@ -1340,9 +1151,8 @@ function handleLogin(silent = false) {
     
     isLoggedIn = true;
     
-    // Save login state to Firebase
-    lastLocalUpdate = Date.now();
-    saveDataToFirebase();
+    // Save login state to local storage
+    saveDataToLocalStorage();
     
     // Update UI for admin mode
     actionsHeader.style.display = 'table-cell';
@@ -1381,9 +1191,8 @@ function handleLogin(silent = false) {
 function handleLogout() {
     isLoggedIn = false;
     
-    // Save logout state to Firebase
-    lastLocalUpdate = Date.now();
-    saveDataToFirebase();
+    // Save logout state to local storage
+    saveDataToLocalStorage();
     
     // Update UI for normal mode
     actionsHeader.style.display = 'none';
@@ -1495,7 +1304,7 @@ function setupEventListeners() {
         saveEditedNavItem();
     });
     
-    // When tab changes, save it to Firebase
+    // When tab changes, save it to local storage
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('nav-item')) {
             activeTabId = e.target.getAttribute('data-tab');
@@ -1520,98 +1329,109 @@ function setupEventListeners() {
     });
 }
 
-// Generate HTML output
+// Generate rules or missions output in JavaScript format
 function generateHtmlOutput() {
-    let html = '';
+    let jsOutput = '';
     
     if (activeTabId === 'mission-list') {
-        // Generate HTML for mission table
-        html = `<div class="mission-container">
-  <div class="mission-table-wrapper">
-    <table class="mission-table">
-      <thead>
-        <tr>
-          <th class="crime-grade">犯罪グレード</th>
-          <th class="crime-name">犯罪名</th>
-          <th class="police-count">必要警察</th>
-        </tr>
-      </thead>
-      <tbody>`;
-
-        missions.forEach(gradeGroup => {
-            const rowCount = gradeGroup.crimes.length;
+        // Generate JavaScript representation of missions
+        jsOutput = 'const initialMissions = [\n';
+        
+        missions.forEach((gradeGroup, gradeIndex) => {
+            jsOutput += `    { \n`;
+            jsOutput += `        grade: "${escapeJsString(gradeGroup.grade)}",\n`;
+            jsOutput += `        fine: "${escapeJsString(gradeGroup.fine)}",\n`;
+            jsOutput += `        crimes: [\n`;
             
-            gradeGroup.crimes.forEach((crime, index) => {
-                html += '\n        <tr>';
-                
-                // Only add the grade cell on the first row of each group
-                if (index === 0) {
-                    html += `\n          <td rowspan="${rowCount}">${gradeGroup.grade}<br>${gradeGroup.fine}</td>`;
-                }
-                
-                // Crime name and police count
-                html += `\n          <td>${crime.name}</td>`;
+            gradeGroup.crimes.forEach((crime, crimeIndex) => {
+                jsOutput += `            { name: "${escapeJsString(crime.name)}", police: ${crime.police}`;
                 
                 if (crime.note) {
-                    html += `\n          <td>${crime.police} ${crime.note}</td>`;
-                } else {
-                    html += `\n          <td>${crime.police}</td>`;
+                    jsOutput += `, note: "${escapeJsString(crime.note)}"`;
                 }
                 
-                html += '\n        </tr>';
-            });
-        });
-
-        html += `\n      </tbody>
-    </table>
-  </div>
-  <div class="mission-description">
-    <h3>ブラックマネーについて</h3>
-    <p>『ブラックマネー』はインベントリにアイテムとして入ります。<br>
-    所持していたら警察に押収されます。</p>
-    <p>街の何処かにいる、マネーロンダリングのおじさんと交渉することで、<br>
-    ブラックマネーを現金に変更するミッションを受けることができます。</p>
-    <p>最低100万以上でのマネーロンダリングをおこなうこと。</p>
-  </div>
-</div>`;
-    } else {
-        // Generate HTML for rules table
-        const activeRules = getActiveTabRules();
-        
-        html = `<table class="min-w-full border-collapse">
-  <thead>
-    <tr class="bg-black text-white">
-      <th class="border px-4 py-2">管理ID</th>
-      <th class="border px-4 py-2">ルールの説明</th>
-    </tr>
-  </thead>
-  <tbody>`;
-
-        if (activeRules.length === 0) {
-            html += `\n    <tr class="bg-white">
-      <td class="border px-4 py-2 text-center" colspan="2">このタブにはまだルールがありません。</td>
-    </tr>`;
-        } else {
-            activeRules.forEach((rule, index) => {
-                // Replace newlines with <br> for HTML output
-                const formattedDescription = rule.description.replace(/\n/g, '<br>');
+                jsOutput += ` }`;
                 
-                html += `\n    <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-200'}">
-      <td class="border px-4 py-2">${rule.id}</td>
-      <td class="border px-4 py-2">${formattedDescription}</td>
-    </tr>`;
+                // Add comma if not the last item
+                if (crimeIndex < gradeGroup.crimes.length - 1) {
+                    jsOutput += ',';
+                }
+                
+                jsOutput += '\n';
             });
-        }
-
-        html += `\n  </tbody>
-</table>`;
+            
+            jsOutput += `        ]\n`;
+            jsOutput += `    }`;
+            
+            // Add comma if not the last item
+            if (gradeIndex < missions.length - 1) {
+                jsOutput += ',';
+            }
+            
+            jsOutput += '\n';
+        });
+        
+        jsOutput += '];';
+    } else {
+        // Generate JavaScript representation of all rules
+        jsOutput = 'const initialRules = {\n';
+        
+        // Loop through all navigation items to get all rule sets
+        navItems.forEach(navItem => {
+            const navId = navItem.id;
+            const navRules = rules[navId] || [];
+            
+            // Skip mission-list as it's handled differently
+            if (navId === 'mission-list') return;
+            
+            jsOutput += `    "${navId}": [\n`;
+            
+            if (navRules.length === 0) {
+                jsOutput += '        // No rules defined for this section\n';
+            } else {
+                navRules.forEach((rule, index) => {
+                    // Format the rule description with proper escaping
+                    jsOutput += `        { id: "${rule.id}", description: "${escapeJsString(rule.description)}" }`;
+                    
+                    // Add comma if not the last item
+                    if (index < navRules.length - 1) {
+                        jsOutput += ',';
+                    }
+                    
+                    jsOutput += '\n';
+                });
+            }
+            
+            jsOutput += '    ]';
+            
+            // Add comma if this is not the last navigation item
+            const lastNonMissionNavIndex = navItems.filter(item => item.id !== 'mission-list').length - 1;
+            const currentNonMissionNavIndex = navItems.filter(item => item.id !== 'mission-list' && item.id <= navId).length - 1;
+            
+            if (currentNonMissionNavIndex < lastNonMissionNavIndex) {
+                jsOutput += ',';
+            }
+            
+            jsOutput += '\n';
+        });
+        
+        jsOutput += '};';
     }
-
-    // Display the HTML output
-    htmlOutput.value = html;
+    
+    // Display the JavaScript output
+    htmlOutput.value = jsOutput;
     rulesTableContainer.style.display = 'none';
     missionTableContainer.style.display = 'none';
     htmlOutputContainer.style.display = 'block';
+}
+
+// Helper function to escape strings for JavaScript
+function escapeJsString(str) {
+    if (!str) return '';
+    return str
+        .replace(/\\/g, '\\\\')  // Escape backslashes
+        .replace(/"/g, '\\"')    // Escape quotes
+        .replace(/\n/g, '\\n');  // Handle newlines
 }
 
 // Copy HTML to clipboard
@@ -1623,27 +1443,3 @@ function copyHtmlToClipboard() {
 
 // Initialize the app when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', init);
-
-// Special error handling for Firebase operations
-window.addEventListener('error', function(e) {
-  console.error('Firebase error:', e.message);
-  hideLoading();
-  alert('データの同期中にエラーが発生しました。ページを再読み込みしてください。');
-});
-
-// Automatically clean up Firebase listeners when the page is closed or refreshed
-window.addEventListener('beforeunload', function() {
-  // Detach all Firebase listeners
-  rootRef.off();
-});
-
-// オフライン状態検出のイベントリスナー
-window.addEventListener('offline', () => {
-    console.log("ブラウザがオフラインになりました");
-    alert("インターネット接続が切断されました。一部の機能が制限される可能性があります。");
-});
-
-window.addEventListener('online', () => {
-    console.log("ブラウザがオンラインに戻りました");
-    // オンラインに戻った時の処理（必要に応じて再接続など）
-});
