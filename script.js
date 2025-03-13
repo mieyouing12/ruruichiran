@@ -1,4 +1,4 @@
-// Firebase Configuration
+// Firebase Configuration - 既存の設定をそのまま使用
 const firebaseConfig = {
     apiKey: "AIzaSyDCxMq0KwaFRhF2XqGON_0NcZ0OSBMdBfA",
     authDomain: "paradox-city-rules.firebaseapp.com",
@@ -9,35 +9,34 @@ const firebaseConfig = {
     appId: "1:458284435175:web:0a7b2e036a5e9f41f7d8ca"
 };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-const rootRef = database.ref('paradoxCity');
+// 変数の定義は維持し、初期化を関数に移動
+let database;
+let rootRef;
 const loadingOverlay = document.getElementById('loadingOverlay');
 
-// Initial rules data - organized by navigation ID
-const initialRules = {
-    "server-rules": [
-        { id: "SR-001", description: "サーバーに参加する全てのプレイヤーはこのルールに従う必要があります。" },
-        { id: "SR-002", description: "他のプレイヤーへの嫌がらせや迷惑行為は禁止です。" },
-        { id: "SR-003", description: "チートやハックの使用は即時BANの対象となります。" },
-        { id: "SR-004", description: "<span class='text-red'>配信者ルール</span>：配信中は視聴者に対して敬意を持って接してください。" }
-    ],
-    "police-rules": [
-        { id: "PR-001", description: "警察官は法律を遵守し、常に公平に行動する必要があります。" },
-        { id: "PR-002", description: "パトロール中は定期的に無線チェックインを行ってください。" }
-    ],
-    "criminal-rules": [
-        { id: "CR-001", description: "犯罪行為を行う前に、適切なロールプレイをしてください。" },
-        { id: "CR-002", description: "他のプレイヤーを長時間拘束することは禁止されています。" }
-    ],
-    "related-rules": [
-        { id: "RR-001", description: "関係者は全ての取引を記録する必要があります。" }
-    ],
-    "mission-list": [
-        { id: "ML-001", description: "ミッション参加者は指定された時間に集合してください。" }
-    ]
-};
+// Firebase初期化機能を分離
+function initializeFirebase() {
+    try {
+        // Firebase SDKの初期化
+        firebase.initializeApp(firebaseConfig);
+        database = firebase.database();
+        
+        // オフラインでも動作するようにデータの永続化を設定
+        database.setPersistence(firebase.database.Persistence.LOCAL)
+            .catch(error => {
+                console.error("オフライン永続化設定エラー:", error);
+                // 永続化の設定に失敗しても処理は継続
+            });
+        
+        rootRef = database.ref('paradoxCity');
+        return true;
+    } catch (error) {
+        console.error("Firebase初期化エラー:", error);
+        alert("Firebaseの初期化に失敗しました。初期データを使用します。");
+        hideLoading();
+        return false;
+    }
+}
 
 // Initial missions data
 const initialMissions = [
@@ -181,22 +180,67 @@ let currentEditCrimeData = null;
 let lastLocalUpdate = Date.now();
 
 // Functions for Firebase data management
+// ローディング関連の関数を改善
 function showLoading() {
-    loadingOverlay.style.display = 'flex';
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'flex';
+    }
 }
 
 function hideLoading() {
-    loadingOverlay.style.display = 'none';
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+    }
 }
 
-// Load data from Firebase
+// 初期化処理を呼び出す部分を修正
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        init();
+        
+        // Firebase接続状態のモニタリングを開始
+        monitorFirebaseConnection();
+    } catch (error) {
+        console.error("スタートアップエラー:", error);
+        hideLoading();
+        alert("アプリケーションの起動中にエラーが発生しました。ページを再読み込みしてください。");
+    }
+});
+
+// Firebase接続状態のモニタリングを追加
+function monitorFirebaseConnection() {
+    if (!firebase || !firebase.database) return;
+    
+    const connectedRef = firebase.database().ref(".info/connected");
+    connectedRef.on("value", (snap) => {
+        if (snap.val() === true) {
+            console.log("Firebase接続: オンライン");
+        } else {
+            console.log("Firebase接続: オフライン");
+            // オフライン時の処理をここに追加可能
+        }
+    });
+}
+
+// Firebase からデータを読み込む関数
 async function loadDataFromFirebase() {
     showLoading();
     
+    // タイムアウト処理を追加（10秒後）
+    const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("データ読み込みがタイムアウトしました")), 10000);
+    });
+    
     try {
-        const snapshot = await rootRef.once('value');
+        // タイムアウトとデータ取得を競争させる
+        const snapshot = await Promise.race([
+            rootRef.once('value'),
+            timeoutPromise
+        ]);
+        
         const data = snapshot.val() || {};
         
+        // 既存の処理を維持
         // Load rules or use initial data
         rules = data.rules || initialRules;
         
@@ -233,8 +277,9 @@ async function loadDataFromFirebase() {
             handleLogin(true); // Silent login
         }
     } catch (error) {
-        console.error("Error loading data from Firebase:", error);
-        // Fallback to initial data
+        console.error("Firebaseからのデータ読み込みエラー:", error);
+        
+        // 既存のフォールバック処理を維持
         rules = initialRules;
         missions = initialMissions;
         navItems = initialNavItems;
@@ -256,74 +301,103 @@ async function loadDataFromFirebase() {
         
         alert("データの読み込み中にエラーが発生しました。初期データを使用します。");
     } finally {
+        // ローディング画面を必ず非表示にする
         hideLoading();
     }
 }
 
-// Save data to Firebase
+// Firebaseにデータを保存する関数
 async function saveDataToFirebase() {
     showLoading();
     
+    // タイムアウト処理を追加（8秒後）
+    const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("データ保存がタイムアウトしました")), 8000);
+    });
+    
     try {
-        await rootRef.set({
-            rules: rules,
-            missions: missions,
-            navItems: navItems,
-            activeTabId: activeTabId,
-            isLoggedIn: isLoggedIn,
-            lastUpdated: firebase.database.ServerValue.TIMESTAMP
-        });
+        // タイムアウトとデータ保存を競争させる
+        await Promise.race([
+            rootRef.set({
+                rules: rules,
+                missions: missions,
+                navItems: navItems,
+                activeTabId: activeTabId,
+                isLoggedIn: isLoggedIn,
+                lastUpdated: firebase.database.ServerValue.TIMESTAMP
+            }),
+            timeoutPromise
+        ]);
     } catch (error) {
-        console.error("Error saving data to Firebase:", error);
-        alert("データの保存中にエラーが発生しました。");
+        console.error("Firebaseへのデータ保存エラー:", error);
+        alert("データの保存中にエラーが発生しました。後でもう一度お試しください。");
     } finally {
+        // ローディング画面を必ず非表示にする
         hideLoading();
     }
 }
 
-// Listen for real-time updates
+// リアルタイム更新のリスナーをセットアップする関数
 function setupRealtimeListeners() {
-    rootRef.on('value', (snapshot) => {
-        const data = snapshot.val() || {};
-        
-        // Only update if the data is newer than our current data
-        if (data.lastUpdated && data.lastUpdated > lastLocalUpdate) {
-            // Update local data
-            rules = data.rules || initialRules;
-            missions = data.missions || initialMissions;
-            navItems = data.navItems || initialNavItems;
-            
-            // Check if we need to switch active tab
-            if (data.activeTabId && activeTabId !== data.activeTabId) {
-                activeTabId = data.activeTabId;
-            }
-            
-            // Ensure each nav item has a prefix
-            navItems = navItems.map(item => {
-                if (!item.prefix) {
-                    item.prefix = generateRandomPrefix();
+    // 既存のリスナーを一旦解除（重複防止）
+    rootRef.off('value');
+    
+    // エラーハンドリングを追加したリスナー設定
+    rootRef.on('value', 
+        (snapshot) => {
+            try {
+                const data = snapshot.val() || {};
+                
+                // 既存の処理を維持
+                // Only update if the data is newer than our current data
+                if (data.lastUpdated && data.lastUpdated > lastLocalUpdate) {
+                    // Update local data
+                    rules = data.rules || initialRules;
+                    missions = data.missions || initialMissions;
+                    navItems = data.navItems || initialNavItems;
+                    
+                    // Check if we need to switch active tab
+                    if (data.activeTabId && activeTabId !== data.activeTabId) {
+                        activeTabId = data.activeTabId;
+                    }
+                    
+                    // Ensure each nav item has a prefix
+                    navItems = navItems.map(item => {
+                        if (!item.prefix) {
+                            item.prefix = generateRandomPrefix();
+                        }
+                        return item;
+                    });
+                    
+                    // Ensure all tabs have a rules array
+                    navItems.forEach(item => {
+                        if (!rules[item.id]) {
+                            rules[item.id] = [];
+                        }
+                    });
+                    
+                    // Update UI
+                    renderNavItems();
+                    if (activeTabId === 'mission-list') {
+                        renderMissionTable();
+                    } else {
+                        renderRulesTable();
+                    }
+                    
+                    lastLocalUpdate = data.lastUpdated;
                 }
-                return item;
-            });
-            
-            // Ensure all tabs have a rules array
-            navItems.forEach(item => {
-                if (!rules[item.id]) {
-                    rules[item.id] = [];
-                }
-            });
-            
-            // Update UI
-            renderNavItems();
-            if (activeTabId === 'mission-list') {
-                renderMissionTable();
-            } else {
-                renderRulesTable();
+            } catch (error) {
+                console.error("リアルタイムデータ処理エラー:", error);
+                // エラーがあっても処理は継続、UIは更新しない
             }
-            
-            lastLocalUpdate = data.lastUpdated;
+        }, 
+        (error) => {
+            // リスナー設定エラー時の処理
+            console.error("Firebaseリスナーエラー:", error);
+            alert("データの監視中にエラーが発生しました。一部の機能が制限される可能性があります。");
+            // エラーがあっても処理は継続
         }
-    });
+    );
 }
 
 // Get the active tab's rules
@@ -375,31 +449,80 @@ function generateNextRuleId() {
     return `${prefix}-${String(nextNumber).padStart(3, "0")}`;
 }
 
-// Initialize the application
+// アプリケーションを初期化する関数
 async function init() {
-    // Load data from Firebase
-    await loadDataFromFirebase();
+    showLoading();
     
-    // Setup real-time listeners
-    setupRealtimeListeners();
-    
-    // Render the navigation items
-    renderNavItems();
-    
-    // Check if we should show missions or rules
-    if (activeTabId === 'mission-list') {
-        rulesTableContainer.style.display = 'none';
-        missionTableContainer.style.display = 'block';
-        renderMissionTable();
-    } else {
-        rulesTableContainer.style.display = 'block';
-        missionTableContainer.style.display = 'none';
-        renderRulesTable();
+    try {
+        // Firebase初期化
+        if (!initializeFirebase()) {
+            // Firebase初期化に失敗した場合、初期データで続行
+            console.log("初期データを使用して起動します");
+            rules = initialRules;
+            missions = initialMissions;
+            navItems = initialNavItems;
+            
+            // Ensure each nav item has a prefix
+            navItems = navItems.map(item => {
+                if (!item.prefix) {
+                    item.prefix = generateRandomPrefix();
+                }
+                return item;
+            });
+            
+            // Ensure all tabs have a rules array
+            navItems.forEach(item => {
+                if (!rules[item.id]) {
+                    rules[item.id] = [];
+                }
+            });
+            
+            // 初期化を続行
+            renderNavItems();
+            if (activeTabId === 'mission-list') {
+                rulesTableContainer.style.display = 'none';
+                missionTableContainer.style.display = 'block';
+                renderMissionTable();
+            } else {
+                rulesTableContainer.style.display = 'block';
+                missionTableContainer.style.display = 'none';
+                renderRulesTable();
+            }
+            
+            setupEventListeners();
+            setupMissionEditFormListeners();
+            return;
+        }
+        
+        // Firebaseからデータを読み込む
+        await loadDataFromFirebase();
+        
+        // リアルタイムリスナーをセットアップ
+        setupRealtimeListeners();
+        
+        // ナビゲーション項目を描画
+        renderNavItems();
+        
+        // アクティブタブによってテーブル表示を切り替え
+        if (activeTabId === 'mission-list') {
+            rulesTableContainer.style.display = 'none';
+            missionTableContainer.style.display = 'block';
+            renderMissionTable();
+        } else {
+            rulesTableContainer.style.display = 'block';
+            missionTableContainer.style.display = 'none';
+            renderRulesTable();
+        }
+        
+        // イベントリスナーをセットアップ
+        setupEventListeners();
+        setupMissionEditFormListeners();
+        
+    } catch (error) {
+        console.error("アプリケーション初期化エラー:", error);
+        alert("アプリケーションの初期化中にエラーが発生しました。ページを再読み込みしてください。");
+        hideLoading();
     }
-    
-    // Set up event listeners
-    setupEventListeners();
-    setupMissionEditFormListeners();
 }
 
 // Render the navigation items
@@ -1512,4 +1635,15 @@ window.addEventListener('error', function(e) {
 window.addEventListener('beforeunload', function() {
   // Detach all Firebase listeners
   rootRef.off();
+});
+
+// オフライン状態検出のイベントリスナー
+window.addEventListener('offline', () => {
+    console.log("ブラウザがオフラインになりました");
+    alert("インターネット接続が切断されました。一部の機能が制限される可能性があります。");
+});
+
+window.addEventListener('online', () => {
+    console.log("ブラウザがオンラインに戻りました");
+    // オンラインに戻った時の処理（必要に応じて再接続など）
 });
