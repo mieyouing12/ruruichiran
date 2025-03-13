@@ -1,7 +1,7 @@
 // Initial rules data - organized by navigation ID
 const initialRules = {
     "server-rules": [
-        { id: "SR-001", description: "<b>【配信者ルール】</b>\n当サーバーで遊ぶには他投稿者の生放送や動画、切り抜きにおいて、他視点からの映り込みで映像に登場することに了承しなければいけません。\n\n配信中・外問わず””Twitch利用規約””に則した行いをする必要があります。\nLGBT、宗教、政治、人種、病気等への配慮が必要です。\n\n全てのサーバールールは、全員が一定の楽しさの水準で遊ぶために存在します。\nルールに書いてないことならなんでもやっていいわけではありません。" },
+        { id: "SR-001", description: "<b>【配信者ルール】</b>\n当サーバーで遊ぶには他投稿者の生放送や動画、切り抜きにおいて、他視点からの映り込みで映像に登場することに了承しなければいけません。\n\n配信中・外問わず""Twitch利用規約""に則した行いをする必要があります。\nLGBT、宗教、政治、人種、病気等への配慮が必要です。\n\n全てのサーバールールは、全員が一定の楽しさの水準で遊ぶために存在します。\nルールに書いてないことならなんでもやっていいわけではありません。" },
         { id: "SR-002", description: "<b>【ロールプレイ】</b>\n\n全てのプレイヤーはサーバー上で1人の『キャラクター』としてリアルな生活を行う必要があります。\nロールプレイとは、「ゲーム内で起きた事象に関して現実の自分が感じたかの様に振る舞うこと」です。" },
         { id: "SR-003", description: "<b>【 キャラメイク 】	</b>\n\nキャラクターには、ロスサントスに来るまでのストーリー・目的が必要です。\n人間として街にいてもおかしくない名前や年齢、出身地を設定する事を推奨します。\n\nキャラクターの名前は既存の活動者の名前を使用することは禁止されています。\n自分が活動者の場合は、そのままでは無い方が良いです。\nキャラが行った行動と活動者の心理について、別々に話すことができるからです。\n全く別の名前にしたり、自分の活動者名を少し変えたりするプレイヤーが多いです。" },
         { id: "SR-004", description: "<b>【初心者マーク】</b>\n\nサーバーに参加した最初の頃は『初心者マーク』が名前の上に表示されます。\n\n初心者マークは自分がゲームに慣れるまで付けることができます。\n最低3回目のログインまでは初心者マークを外さないようにしてください。\n\n5日目のログインまで、警察、救急隊になることはできません。\n警察と救急隊はゲームの中でも核になる職業の為、初心者にはオススメできません。\n7日目のログインまでは強盗や犯罪ミッションをしてはいけません。\n初日から強盗をすると、GTAオンラインのようなプレイスタイルになってしまう方が多い為、禁止しています。\n※一日の始まりの定義は0時とする\n※こちらは2キャラ目以降には適用されません。" },
@@ -9,11 +9,11 @@ const initialRules = {
         { id: "SR-006", description: "<b>【 ランダムデスマッチ・ビークルランダムデスマッチの禁止 】</b>\n\nロールプレイ無く唐突に誰かを轢き殺したり、銃や近接武器で相手を殺害してはいけません。" },
         { id: "SR-007", description: "<b>【 意図的なログアウトやリスポーンの禁止 】</b>\n\n逮捕や死亡/ダウンを防ぐ為に意図的なログアウトやリスポーンを行ってはいけません。\nバグによるトラブルやダウンが発生した場合はこの限りに含まれません。" },
         { id: "SR-008", description: "<b>【 バグ（グリッチ）やチートの悪用の禁止 】</b>\n\nサーバーの設定ミスやシステムのバグを利用して金銭を稼いだり、有利を勝ち取る行為は固く禁止されています。\nもちろんチート・ハックも禁止。\n\n例\n※壁越しにトランクを開いてアイテムを使う\n※床をすり抜けるバグを使って警察から逃げる\n※インベントリにてアイテムでスロットを埋めて必要なもの以外を取得しないようにする\n※運営が意図しない速度をバグなどを利用して故意に出す行為\n※グリッチローリングや瞬間移動する打ち方を禁止\n上記の例以外にも運営でバグの悪用や意図していない挙動の悪用と判断した場合はBANなどの対応をします。" },
-        { id: "SR-009", description: "<b>【 パワーゲーミングの禁止 】</b>\n\nRP中に現実を無視しゲーム的に動く事をパワーゲーミングといいます。\nパワーゲーミングはRP中に気づかずに行ってしまう可能性が有るため十分に注意する必要があります。\n\n例\n・ダウン中にラジオを使う\n・手錠をつけられているのにも関わらず、ラジオや通話を使用する\n・人質がいるのにもかかわらず、人質ごと銃撃を加える\n・一度ダウンし傷ついた体で同じ戦線に復帰する\n・ゲームの仕様を利用して、心なきを倒さずに大型ミッションを成功させる(サーマルミッションを含む)\n・本来の使用用途ではないアイテム（スケボー等）を使って落下ダメージを回避する\n・エモートをロールプレイ以外の『有利な状況』につながる為に使用する\n・その他モーションがキャンセルされるエモートなどを利用してダウン中に移動する行為\n・キーバインドを変更しモーションがキャンセルされるバグを使ってパンチを連続で出す行為\n・テーザーが当たりしびれたのにもかかわらず、スライディングなどでモーションキャンセルする行為やしびれが解除された後に全力で走って逃走する行為\n・システムを悪用して、本来の状況から脱出しようとする行為\n・『カバン（bag)』に違法なアイテムを詰めて、隠すのに使う行為\n・トランクの中にミッションで手に入れたアイテムをいれて、利確をして、それを後で転送をする行為の禁止\n・ジョブについていないと使えないアイテムを出勤状態以外での使用禁止\n\n上記の例以外にも、『現実的にそれおかしすぎない？』という行動はパワーゲーミングに該当します。" },
+        { id: "SR-009", description: "<b>【 パワーゲーミングの禁止 】</b>\n\nRP中に現実を無視しゲーム的に動く事をパワーゲーミングといいます。\nパワーゲーミングはRP中に気づかずに行ってしまう可能性が有るため十分に注意する必要があります。\n\n例\n・ダウン中にラジオを使う\n・手錠をつけられているのにもかかわらず、ラジオや通話を使用する\n・人質がいるのにもかかわらず、人質ごと銃撃を加える\n・一度ダウンし傷ついた体で同じ戦線に復帰する\n・ゲームの仕様を利用して、心なきを倒さずに大型ミッションを成功させる(サーマルミッションを含む)\n・本来の使用用途ではないアイテム（スケボー等）を使って落下ダメージを回避する\n・エモートをロールプレイ以外の『有利な状況』につながる為に使用する\n・その他モーションがキャンセルされるエモートなどを利用してダウン中に移動する行為\n・キーバインドを変更しモーションがキャンセルされるバグを使ってパンチを連続で出す行為\n・テーザーが当たりしびれたのにもかかわらず、スライディングなどでモーションキャンセルする行為やしびれが解除された後に全力で走って逃走する行為\n・システムを悪用して、本来の状況から脱出しようとする行為\n・『カバン（bag)』に違法なアイテムを詰めて、隠すのに使う行為\n・トランクの中にミッションで手に入れたアイテムをいれて、利確をして、それを後で転送をする行為の禁止\n・ジョブについていないと使えないアイテムを出勤状態以外での使用禁止\n\n上記の例以外にも、『現実的にそれおかしすぎない？』という行動はパワーゲーミングに該当します。" },
         { id: "SR-010", description: "<b>【 恐怖が欠如したプレイングの禁止 】	</b>\n\nお互いに命を持った人間としてゲーム内で責任と恐怖を感じる必要があります。\n現実で自分がされたら怖がるであろうシーンでは、それを反映する必要があります。" },
         { id: "SR-011", description: "<b>【 十分に親しい間柄以外での、本人、肉親、知人になりすます行為の禁止 】</b>	\n\nやるのであればラインをしっかり見極め、相手が不快にならないように行なってください" },
         { id: "SR-012", description: "<b>【 メタ行為、ゴースティング行為の禁止 】</b>\n\nキャラクターが知ることができる要素だけを使用してストーリーを作る必要があります。\n現実のSNS等で知ってしまった情報をキャラクターに持ち込んではいけません。\n他のキャラクターで知った情報を別のキャラクターでも知ったこととして使用してはいけません。\nサーバー内の他住民とゲーム外の通話ツールを繋げながら（LineやSkype、Discord等）連携を行ってはいけません。\nAFKキックから逃れるためにエモートを活用してはいけません。\n\nゲーム内でサーバールールについて喧嘩をしたり、メタ的な言い争いをしてはいけません\n例：「今のお前はサーバールール違反だ。」「ランダムデスマッチになるからやめよう」「BANされるぞ」等\n例（リアルのX等で）：Aさん『○○にいるけどここ奇麗だなぁ』 →Bさん『おっAさんINしてるの 今からいくわー』 → Bさん『ついたよー』などのやり取り\n\n一部の配信サイトでは、コメント等を投稿していなくても配信サイトに居るか居ないかわかるサイトもございます。\n無音にしたまま消し忘れ・開いたままにしていると実際に配信を見ていなくても見ているように見えてしまします。\nストグラをプレイ中、他者の配信視聴履歴がありますと罰則（BAN）の対象になる可能性がございますので十分にご注意ください。\n\n\n禁止例\nコメントなどの外部サイトからの情報を含め人間関係に影響を与えるプレイを行う\n請求書やインベントリ受け渡し欄を利用して身分を隠そうとした相手の名前を知ろうとする行為\n他のボイスチャットツールを連携の為に使用する行為\n配信外で他キャラクターの配信を観ながら、自キャラクターでプレイを行なう行為" },
-        { id: "SR-013", description: "<b>【 ダウン状態について 】</b>\n\nHPが0になったら体が横になります。これをダウン状態と呼びます。\nこの状態では苦しみながら会話を行う必要があります。\n\nダウン状態で蘇生された場合。\n→ 全ての記憶を保ったままプレイを続行する事ができます。\n\nリスポーンを選択した場合。\n→ 死亡する原因となった記憶を全てなくしてプレイを行わなければなりません。\n友達、乗り物、家、隠し場所などは覚えていますが恨みや妬みという感情は無いので復讐を行なう事はできません。\n\nダウン中にラジオチャットで”言葉”を発する事を禁止。通知を出すことは可。\nダウン中に痛がる演技・助けてほしいというRPとして成り立つ以外のボイスチャットを事を禁止。\nスーパーシャウトで過剰に痛がり、大声を上げて他プレイヤーのRPを妨げる行為を禁止\n但し、状況的に日常会話などをしても問題ないとする場合は例外とする。\nダウン中のダメ例\n・2階に2人いる！ナイスナイス！アサルト持ってる！7239にいる！など\n大丈夫な例\n・苦しみながら「来ちゃダメ」「逃げろ」等\n・連行されながら「くそー」等" },
+        { id: "SR-013", description: "<b>【 ダウン状態について 】</b>\n\nHPが0になったら体が横になります。これをダウン状態と呼びます。\nこの状態では苦しみながら会話を行う必要があります。\n\nダウン状態で蘇生された場合。\n→ 全ての記憶を保ったままプレイを続行する事ができます。\n\nリスポーンを選択した場合。\n→ 死亡する原因となった記憶を全てなくしてプレイを行わなければなりません。\n友達、乗り物、家、隠し場所などは覚えていますが恨みや妬みという感情は無いので復讐を行なう事はできません。\n\nダウン中にラジオチャットで"言葉"を発する事を禁止。通知を出すことは可。\nダウン中に痛がる演技・助けてほしいというRPとして成り立つ以外のボイスチャットを事を禁止。\nスーパーシャウトで過剰に痛がり、大声を上げて他プレイヤーのRPを妨げる行為を禁止\n但し、状況的に日常会話などをしても問題ないとする場合は例外とする。\nダウン中のダメ例\n・2階に2人いる！ナイスナイス！アサルト持ってる！7239にいる！など\n大丈夫な例\n・苦しみながら「来ちゃダメ」「逃げろ」等\n・連行されながら「くそー」等" },
         { id: "SR-014", description: "<b>【 蘇生後 】	</b>\n\nあなたは怪我の直後だと言うことを念頭に置いてプレイを行わなければありません。\n松葉杖が付いているときは、運転してはいけない。助手席に乗るのは可能" },
         { id: "SR-015", description: "<b>【 リスポーンと罪 】	</b>\n\n他のプレイヤーに担がれている、拘束されている間はリスポーンを選択してはいけません。\nリスポーンを選択した場合でもあなたが直前に行っていた犯罪の罪状は残ります。" },
         { id: "SR-016", description: "<b>【 警察 】</b>\n\n別タブの 警察用ルール を参照すること。" },
@@ -29,7 +29,7 @@ const initialRules = {
         { id: "SR-026", description: "<b>【 初心者マークの悪用の禁止 】</b>\n\n初心者マークをつけている間はあらゆる罰金30万円以上の犯罪をしてはいけません。" },
         { id: "SR-027", description: "<b>【 「多くの人に視聴される状況で炎上しうる行為」の禁止 】</b>	\n\n貴方が配信をしていて100人に見られていると仮定した場合、倫理的に言うべきではない言動や行動をしてはいけません。" },
         { id: "SR-029", description: "<b>【 職について 】	</b>\n\nすべてのキャラクターは、メインの職業の他にサブ職業1つに就くことができます。\n白市民パスを持っているプレイヤーに限り、3つまで職業に就くことができる。\n\nギャングに所属することは１つの職業枠に含まれる。\n\nディーラーのスタッフになることは１つの職業枠に含まれる。\n\n白市民パスを持っているプレイヤー（持つ予定のプレイヤー）以外はコンビニを運営してはいけません。\nコンビニの運営は、職業枠には含まれない。" }
-    ]
+    ],
     "police-rules": [
         { id: "PR-001", description: "警察官は法律を遵守し、常に公平に行動する必要があります。" },
         { id: "PR-002", description: "パトロール中は定期的に無線チェックインを行ってください。" }
@@ -40,7 +40,7 @@ const initialRules = {
     ],
     "related-rules": [
         { id: "RR-001", description: "関係者は全ての取引を記録する必要があります。" }
-    ],
+    ]
 };
 
 // Initial missions data
@@ -57,8 +57,11 @@ const initialMissions = [
         grade: "強盗罪",
         fine: "罰金1,000,000円",
         crimes: [
+            { name: "マネーロンダリング", police: 0 },
             { name: "ブースティングB以下", police: 1 },
-            { name: "コンビニ強盗", police: 3, note: "(テスト期間中)" }
+            { name: "ATM強盗", police: 2, note: "(テスト期間中)" },
+            { name: "コンビニ強盗", police: 3, note: "(テスト期間中)" },
+            { name: "高級車強奪ミッション", police: 4 }
         ]
     },
     { 
@@ -69,7 +72,7 @@ const initialMissions = [
             { name: "航空機ハッキング強盗 (人質利用禁止)", police: 4 },
             { name: "宝石店強盗", police: 4 },
             { name: "サーマルミッション (人質利用禁止)", police: 4, note: "(テスト期間中)" },
-            { name: "パレト銀行強盗", police: 4 }
+            { name: "パレト銀行強盗(テスト期間中)", police: 4 }
         ]
     },
     { 
@@ -85,7 +88,9 @@ const initialMissions = [
             { name: "工場襲撃 (プレリリース)", police: 8 },
             { name: "アーティファクト", police: 9 },
             { name: "ユニオンヘイスト", police: 10 },
-            { name: "パシフィック銀行強盗", police: 11 }
+            { name: "パシフィック銀行強盗", police: 11 },
+            { name: "ダイヤモンドカジノ強盗", police: 11 },
+            { name: "パレト銀行強盗", police: 4 }
         ]
     }
 ];
@@ -204,7 +209,8 @@ async function loadDataFromLocalStorage() {
         if (storedRules) {
             rules = JSON.parse(storedRules);
         } else {
-            rules = initialRules;
+            // 初期化時のみinitialRulesからルールをロード
+            rules = JSON.parse(JSON.stringify(initialRules));
         }
         
         // Load missions
@@ -212,7 +218,8 @@ async function loadDataFromLocalStorage() {
         if (storedMissions) {
             missions = JSON.parse(storedMissions);
         } else {
-            missions = initialMissions;
+            // 初期化時のみinitialMissionsからミッションをロード
+            missions = JSON.parse(JSON.stringify(initialMissions));
         }
         
         // Load navigation items
@@ -220,7 +227,8 @@ async function loadDataFromLocalStorage() {
         if (storedNavItems) {
             navItems = JSON.parse(storedNavItems);
         } else {
-            navItems = initialNavItems;
+            // 初期化時のみinitialNavItemsからナビゲーションアイテムをロード
+            navItems = JSON.parse(JSON.stringify(initialNavItems));
         }
         
         // Load active tab
@@ -254,9 +262,9 @@ async function loadDataFromLocalStorage() {
     } catch (error) {
         console.error("Error loading data from local storage:", error);
         // Fallback to initial data
-        rules = initialRules;
-        missions = initialMissions;
-        navItems = initialNavItems;
+        rules = JSON.parse(JSON.stringify(initialRules));
+        missions = JSON.parse(JSON.stringify(initialMissions));
+        navItems = JSON.parse(JSON.stringify(initialNavItems));
         
         // Ensure each nav item has a prefix
         navItems = navItems.map(item => {
@@ -1158,8 +1166,8 @@ function handleLogin(silent = false) {
         const password = document.getElementById('password').value;
         
         // Simple authentication (dummy)
-        if (username !== 'aim' || password !== '123123123') {
-            alert('ログイン情報が正しくありません。');
+        if (username !== 'admin' || password !== 'admin123') {
+            alert('ログイン情報が正しくありません。試用アカウント: admin/admin123');
             return;
         }
         
@@ -1239,6 +1247,20 @@ function handleLogout() {
 
 // Setup all event listeners
 function setupEventListeners() {
+    // リセットボタンを追加
+    const adminActions = document.getElementById('adminActions');
+    if (adminActions) {
+        const resetButton = document.createElement('button');
+        resetButton.id = 'resetDataBtn';
+        resetButton.className = 'btn btn-red';
+        resetButton.innerHTML = '<i class="fas fa-sync-alt"></i> リセット';
+        resetButton.style.marginLeft = '8px';
+        adminActions.appendChild(resetButton);
+        
+        // イベントリスナーを追加
+        resetButton.addEventListener('click', resetToInitialData);
+    }
+    
     // User icon click - show login modal
     userIcon.addEventListener('click', function() {
         if (isLoggedIn) {
@@ -1348,6 +1370,26 @@ function setupEventListeners() {
             editNavModal.style.display = 'none';
         }
     });
+}
+
+// データをリセットする関数
+function resetToInitialData() {
+    if (confirm('現在のデータを初期データにリセットしますか？この操作は元に戻せません。')) {
+        // 現在のタブのデータのみをリセット
+        if (activeTabId === 'mission-list') {
+            // ミッションデータをリセット
+            missions = JSON.parse(JSON.stringify(initialMissions));
+            localStorage.setItem(MISSIONS_KEY, JSON.stringify(missions));
+            renderMissionTable();
+        } else {
+            // 現在のタブのルールだけをリセット
+            rules[activeTabId] = JSON.parse(JSON.stringify(initialRules[activeTabId] || []));
+            localStorage.setItem(RULES_KEY, JSON.stringify(rules));
+            renderRulesTable();
+        }
+        
+        alert('データを初期状態にリセットしました。');
+    }
 }
 
 // Generate rules or missions output in JavaScript format
