@@ -59,7 +59,6 @@ const initialMissions = [
         grade: "軽強盗罪",
         fine: "罰金500,000円",
         crimes: [
-            { name: "ハッキング行為", police: 1 },
             { name: "空き巣", police: 2 }
         ]
     },
@@ -68,7 +67,7 @@ const initialMissions = [
         fine: "罰金1,000,000円",
         crimes: [
             { name: "ブースティングB以下", police: 1 },
-            { name: "コンビニ強盗", police: 3 }
+            { name: "コンビニ強盗", police: 2 }
         ]
     },
     { 
@@ -85,13 +84,13 @@ const initialMissions = [
         grade: "重強盗罪",
         fine: "罰金3,000,000円\n(人質利用禁止)",
         crimes: [
-            { name: "ブースティングA以上", police: 4 },
+            { name: "ブースティングA以上", police: 3 },
             { name: "金庫強盗", police: 5 },
             { name: "BOBCAT強盗", police: 5 },
             { name: "オイルリグ強盗", police: 6 },
-            { name: "飛行場襲撃強盗", police: 7 },
-            { name: "豪華客船強盗", police: 8 },
-            { name: "アーティファクト", police: 9 },
+            { name: "飛行場襲撃強盗", police: 6 },
+            { name: "豪華客船強盗", police: 7 },
+            { name: "アーティファクト", police: 8 },
             { name: "ユニオンヘイスト", police: 10 },
             { name: "パシフィック銀行強盗", police: 11 }
         ]
