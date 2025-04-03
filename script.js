@@ -63,7 +63,8 @@ const initialRules = {
     ],
     "fudousan-rules": [
         { id: "6.1", description: "<b>【不動産全般】</b>\n\n過去１ヶ月の間に犯罪の経験がある方は不動産になることはできない\n\n建物の外見をみて、入らなそうな内装を入れないようにしてください\n\n１人が購入できる最大物件は「３つ」までとする。※パトロン者は特別ルールを参照" },
-        { id: "6.2", description: "<b>【値段】</b>\n\n値段は市が決めた金額で請求すること\n\n<b>土地代</b>\n・１０００番代　１０００万円\n・２０００番代　１２００万円\n・３０００番代　１３００万円\n・４０００番代　１４００万円\n・５０００番代　１５００万円\n・６０００番代　６０００万円\n・７０００番代　５０００万円\n・８０００番代　４５００万円\n・９０００番代　４０００万円\n・１００００番代　３５００万円\n\n<b>内装金額</b>\n<a href=\"https://docs.google.com/spreadsheets/d/10nhFLwiuEmEnAAOhGr-cDdAPNRhaETvrp58lezDi7S0/edit?usp=sharing\">こちらを参照</a>\n駐車所　一律５００万円" }
+        { id: "6.2", description: "<b>【値段】</b>\n\n値段は市が決めた金額で請求すること\n\n<b>土地代</b>\n・１０００番代　１０００万円\n・２０００番代　１２００万円\n・３０００番代　１３００万円\n・４０００番代　１４００万円\n・５０００番代　１５００万円\n・６０００番代　６０００万円\n・７０００番代　５０００万円\n・８０００番代　４５００万円\n・９０００番代　４０００万円\n・１００００番代　３５００万円\n\n<b>内装金額</b>\n<a href=\"https://docs.google.com/spreadsheets/d/10nhFLwiuEmEnAAOhGr-cDdAPNRhaETvrp58lezDi7S0/edit?usp=sharing\">こちらを参照</a>\n駐車所　一律５００万円" },
+        { id: "6-001", description: "<b>【スタッシュについて】</b>\n\n0円のスタッシュを複数置く行為を禁止" }
     ],
     "mechanic-rules": [
         { id: "7.1", description: "<b>【メカニック全般】</b>\n\n今のところ特に何もなし" }
