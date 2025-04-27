@@ -130,7 +130,8 @@ const initialMissions = [
             { name: "Fleeca銀行強盗", police: 4 },
             { name: "宝石店強盗", police: 4 },
             { name: "サーマルミッション (人質利用禁止)", police: 4 },
-            { name: "パレト銀行強盗 (人質利用禁止)", police: 4 }
+            { name: "パレト銀行強盗 (人質利用禁止)", police: 4 },
+            { name: "飛行機墜落ミッション", police: 4 },
         ]
     },
     { 
