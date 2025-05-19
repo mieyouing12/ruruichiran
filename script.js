@@ -1438,7 +1438,7 @@ function copyHtmlToClipboard() {
 function addResetButton() {
     const resetButton = document.createElement('button');
     resetButton.className = 'btn btn-blue';
-    resetButton.innerHTML = '<i class="fas fa-redo"></i> 元に戻す';
+    resetButton.innerHTML = '<i class="fas fa-redo"></i> 更新する';
     resetButton.style.position = 'fixed';
     resetButton.style.bottom = '20px';
     resetButton.style.right = '20px';
