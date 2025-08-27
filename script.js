@@ -1,3 +1,13 @@
+// キャッシュ制御
+window.addEventListener('load', () => {
+    // ブラウザのキャッシュを無効化
+    window.onpageshow = function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    };
+});
+
 const initialRules = {
     "introduction-rules": [
         { id: "1.1", description: "<b>ようこそ！PRGR (ぱらぐら)へ</b>\n\n「一人ひとりがロスサントス市民になりきり、\n住民同士の交流や様々な職業に就きながら楽しんでください！」" },
@@ -1462,6 +1472,17 @@ function addResetButton() {
             });
         }
     });
+
+// 外部リソースのキャッシュ制御
+function addNoCacheToUrl(url) {
+    return `${url}?_=${new Date().getTime()}`;
+}
+
+// スタイルシートの再読み込み
+const stylesheets = document.querySelectorAll('link[rel="stylesheet"]');
+stylesheets.forEach(stylesheet => {
+    stylesheet.href = addNoCacheToUrl(stylesheet.href);
+});
     
     document.body.appendChild(resetButton);
 }
